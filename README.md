@@ -4,3 +4,4 @@
 - Muda nome e senha de usuário
 - Altera o papel de parede
 - Desativa o windows update
+- Desinstala os programas especificados

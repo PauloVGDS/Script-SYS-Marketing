@@ -1,9 +1,6 @@
-param (
-    [string]$User,
-    [string]$Password,
-    [string]$Path
-
-)
+$User = Read-Host "Nome de usuário: "
+$Password = Read-Host "Senha: "
+$Path = Read-Host "Diretorio do papel de parede: "
 
 Add-Type -TypeDefinition @"
 using System;
@@ -16,11 +13,9 @@ public class Wallpaper {
 "@
 
 
-
-
 # Apagar arquivos das pastas: Download, Documentos, Imagens, Vídeos e Área de Trabalho(menos os atalhos básicos)
 try {
-    Remove-Item -Path "C:$env:HOMEPATH\Desktop\*" -Exclude "Lixeira","Excel.lnk", "PowerPoint.lnk", "Word.lnk", "Google Chrome", "Script-SYSMKT.ps1"
+    Remove-Item -Path "C:$env:HOMEPATH\Desktop\*" -Exclude "Lixeira","Excel.lnk", "PowerPoint.lnk", "Word.lnk", "Google Chrome"
     Remove-Item -Path "C:$env:HOMEPATH\Downloads\*" -Recurse -Force
     Remove-Item -Path "C:$env:HOMEPATH\Documents\*" -Recurse -Force
     Remove-Item -Path "C:$env:HOMEPATH\Videos\*" -Recurse -Force
@@ -28,10 +23,10 @@ try {
     
 }
 catch {
-    Write-Host "Ocorreu um erro na etapa 1: $($_.Exception.Message)"
+    Write-Host "Apagar arquivos de pastas desnecessarias: $($_.Exception.Message)"
 }
-finally {
-    Write-Host "Etapa 1 concluida com sucesso!"
+else {
+    Write-Host "Apagar arquivos de pastas desnecessarias: Sucesso!"
 }
 
 
@@ -47,10 +42,10 @@ try {
     
 }
 catch {
-    Write-Host "Ocorreu um erro na etapa 2: $($_.Exception.Message)"
+    Write-Host "Mudar nome e senha de usuário: $($_.Exception.Message)"
 }
-finally {
-    Write-Host "Etapa 2 concluida com sucesso!"
+else {
+    Write-Host "Mudar nome e senha de usuário: Sucesso!"
 }
 
 
@@ -62,17 +57,36 @@ try {
     [Wallpaper]::SystemParametersInfo($SPI_SETDESKWALLPAPER, 0, $Path, $UpdateIniFile -bor $SendChange)
 }
 catch {
-    Write-Host "Ocorreu um erro na etapa 3: $($_.Exception.Message)"
+    Write-Host "Alterar papel de parede: $($_.Exception.Message)"
 }
-finally {
-    Write-Host "Etapa 3 concluida com sucesso!"
+else {
+    Write-Host "Alterar papel de parede: Sucesso!"
 }
 
 
 # Desativar Windows Update
 Stop-Service -Name wuauserv -Force
 Set-Service -Name wuauserv -StartupType Disabled
+Write-Host "Windows Update: Desativado"
 
+try {
+    if (!(Get-Command winget -ErrorAction SilentlyContinue)) {
+        Write-Host "Winget não está instalado!"
+        exit
+    }
+    Write-Host "Winget está instalado!"
 
+    $programa = ""
+    while ($programa -ne "stop") {
+        $programa = Read-Host "Nome do programa: "
+        Write-Host "Desinstalando $programa"
+        winget uninstall $programa   
+    }
 
-
+}
+catch {
+    Write-Host "Desinstalacao de programas desnecessarios: $($_.Exception.Message)"
+}
+else {
+    Write-Host "Desinstalacao de programas desnecessarios: Sucesso!"
+}
